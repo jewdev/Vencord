@@ -81,7 +81,7 @@ function FakeVoiceOptionToggleButton() {
 export default definePlugin({
     name: "FakeVoiceOptions",
     description: "Fake mute, deafen, and camera for VCs",
-    authors: [Devs.AceSilentKill],
+    authors: [Devs.jewdev],
     patches: [
         {
             find: ".Messages.ACCOUNT_SPEAKING_WHILE_MUTED",
