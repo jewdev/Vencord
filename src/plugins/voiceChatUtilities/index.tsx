@@ -138,7 +138,7 @@ const VoiceChannelContext: NavContextMenuPatchCallback = (children, { channel }:
 export default definePlugin({
     name: "VoiceChatUtilities",
     description: "This plugin allows you to perform multiple actions on an entire channel (move, mute, disconnect, etc.) (originally by dutake)",
-    authors: [{ name: "! 𝕯'𝖆𝖒𝖘", id: 769939285792653325n }, Devs.D3SOX],
+    authors: [Devs.jewdev, Devs.D3SOX],
 
     contextMenus: {
         "channel-context": VoiceChannelContext
