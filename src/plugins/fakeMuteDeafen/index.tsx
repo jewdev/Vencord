@@ -291,8 +291,7 @@ function stopCtxObserver() {
 export default definePlugin({
     name: "Fake Deafen & Mute",
     description:
-        "Right-click the Mute/Deafen button to toggle Fake Mute or Fake Deafen. Others will see you as muted/deafened while you can still speak and hear. " +
-        "dont patch this.",
+        "Right-click the Mute/Deafen button to toggle Fake Mute or Fake Deafen. Others will see you as muted/deafened while you can still speak and hear. dont patch this.",
     authors: [
         Devs.jewdev
     ],
