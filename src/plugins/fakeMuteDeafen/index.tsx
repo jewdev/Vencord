@@ -229,22 +229,19 @@ function fromCachedTemplate(opts: { id: string; label: string; checked: boolean;
 }
 
 function inject(menu: HTMLElement, kind: Kind) {
-    // learn template from Push-to-Talk row if present
-    const ptt = menu.querySelector<HTMLElement>("#audio-device-context-input-mode");
-    if (ptt) tplOuterHTML = ptt.outerHTML;
+    // learn template from Voice Settings row
+    const voiceSettings = menu.querySelector<HTMLElement>("#audio-device-context-voice-settings");
+    if (voiceSettings) tplOuterHTML = voiceSettings.outerHTML;
 
     const id = kind === "mute" ? "vc-fake-mute" : "vc-fake-deafen";
     if (menu.querySelector("#" + id)) return;
 
-    const anchor =
-        kind === "mute"
-            ? (menu.querySelector<HTMLElement>("#audio-device-context-input-mode") || menu.querySelector<HTMLElement>(".checkboxContainer_c1e9c4.labelContainer_c1e9c4"))
-            : menu.querySelector<HTMLElement>("#audio-device-context-voice-settings");
+    const anchor = menu.querySelector<HTMLElement>("#audio-device-context-voice-settings");
 
     if (!anchor) return;
 
     const node =
-        (ptt && kind === "mute" ? cloneCheckbox(ptt, id, "Fake mute", fake.mute, n => toggleFake("mute", n))
+        (voiceSettings && kind === "mute" ? cloneCheckbox(voiceSettings, id, "Fake mute", fake.mute, n => toggleFake("mute", n))
             : fromCachedTemplate({ id, label: kind === "mute" ? "Fake mute" : "Fake deafen", checked: fake[kind], onToggle: n => toggleFake(kind, n) }))
         ?? (() => {
             const any = menu.querySelector<HTMLElement>(".checkboxContainer_c1e9c4.labelContainer_c1e9c4");
@@ -269,7 +266,7 @@ function startCtxObserver() {
             if (!menus.length) continue;
             queueMicrotask(() => {
                 for (const menu of menus) {
-                    const isMute = !!(menu.querySelector("#audio-device-context-audioinput-devices") || menu.querySelector("#audio-device-context-input-mode"));
+                    const isMute = !!(menu.querySelector("#audio-device-context-audioinput-devices") && menu.querySelector("#audio-device-context-voice-settings"));
                     const isDeafen = !!menu.querySelector("#audio-device-context-audiooutput-devices");
                     if (isMute) inject(menu, "mute");
                     if (isDeafen) inject(menu, "deafen");
