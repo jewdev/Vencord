@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { callWithRetry } from "../utils/retry";
+import { callWithRetry } from "@plugins/completeDiscordQuest/utils/retry";
+
 import { QuestHandler } from "./types";
 
 export const playOnDesktopHandler: QuestHandler = {

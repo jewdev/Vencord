@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import settings from "@plugins/completeDiscordQuest/settings";
+import { callWithRetry } from "@plugins/completeDiscordQuest/utils/retry";
 import { findByPropsLazy } from "@webpack";
 
-import settings from "../settings";
-import { callWithRetry } from "../utils/retry";
 import { QuestHandler } from "./types";
 
 const VoiceActions = findByPropsLazy("selectVoiceChannel", "selectChannel") as { selectVoiceChannel?: (channelId: string) => void; };
