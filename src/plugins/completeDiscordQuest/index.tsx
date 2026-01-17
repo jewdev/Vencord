@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { FluxDispatcher, RestAPI } from "@webpack/common";
@@ -317,10 +318,7 @@ function handleQuestCompletion(quest: QuestValue) {
 export default definePlugin({
     name: "CompleteDiscordQuest",
     description: "A plugin that completes multiple discord quests in background simultaneously.",
-    authors: [{
-        name: "Talya1412",
-        id: 935942283214344302n
-    }],
+    authors: [Devs.jewdev],
     settings,
     patches: [
         {
