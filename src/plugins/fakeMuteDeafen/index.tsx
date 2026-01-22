@@ -1,5 +1,11 @@
-import definePlugin from "@utils/types";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { Devs } from "@utils/constants";
+import definePlugin from "@utils/types";
 import { findByProps } from "@webpack";
 import { React } from "@webpack/common";
 
@@ -25,7 +31,7 @@ function FakeDeafenButton() {
     const handleClick = React.useCallback((e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        
+
         const newState = !fakeDeafenEnabled;
         fakeDeafenEnabled = newState;
         setEnabled(newState);
@@ -39,7 +45,7 @@ function FakeDeafenButton() {
 
         const channelId = SelectedChannelStore.getVoiceChannelId();
         const channel = channelId ? ChannelStore?.getChannel(channelId) : null;
-        
+
         if (channel) {
             GatewayConnection.voiceStateUpdate({
                 channelId: channel.id,
@@ -83,7 +89,7 @@ export default definePlugin({
     start() {
         const GatewayConnection = findByProps("voiceStateUpdate", "voiceServerPing");
         if (!GatewayConnection) return;
-        
+
         originalVoiceStateUpdate = GatewayConnection.voiceStateUpdate;
         GatewayConnection.voiceStateUpdate = function (args: any) {
             if (fakeDeafenEnabled && args && typeof args === "object") {
