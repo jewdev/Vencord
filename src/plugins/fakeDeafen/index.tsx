@@ -8,6 +8,7 @@ import { ApplicationCommandInputType, sendBotMessage } from "@api/Commands";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import { Menu } from "@webpack/common";
 
 export let fakeD = false;
 
@@ -32,6 +33,27 @@ export default definePlugin({
     name: "FakeDeafen",
     description: "Appear deafened to others while still being able to hear them. Use /fd to toggle",
     authors: [Devs.jewdev],
+
+    contextMenus: {
+        "audio-device-context"(children, data) {
+            if (!data?.renderOutputDevices) return;
+
+            if (children.some(c => c?.props?.id === "fake-deafen-toggle")) return;
+
+            children.push(
+                <Menu.MenuCheckboxItem
+                    id="fake-deafen-toggle"
+                    label={`Fake Deafen 𓉘 ${fakeD ? "ON" : "OFF"} 𓉝 `}
+                    checked={fakeD}
+                    action={() => {
+                        fakeD = !fakeD;
+                        deafen();
+                        setTimeout(deafen, 250);
+                    }}
+                />
+            );
+        }
+    },
 
     patches: [
         {
