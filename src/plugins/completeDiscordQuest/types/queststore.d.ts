@@ -57,6 +57,7 @@ interface Config {
     assets: Assets;
     colors: Colors;
     messages: Messages;
+    taskConfig: TaskConfig;
     taskConfigV2: TaskConfigV2;
     rewardsConfig: RewardsConfig;
     sharePolicy: string;
@@ -84,6 +85,11 @@ interface Messages2 {
 
 interface RedemptionInstructionsByPlatform {
     "0": string;
+}
+
+interface TaskConfig {
+    tasks: Tasks;
+    joinOperator: string;
 }
 
 interface TaskConfigV2 {
