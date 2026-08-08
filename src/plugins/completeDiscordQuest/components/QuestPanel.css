@@ -1,0 +1,305 @@
+/*
+ * Every colour ends in a literal. Discord has been migrating its theme variables, and a var()
+ * chain with no concrete fallback computes to the initial value when nothing resolves, which for
+ * `background` is transparent. The literals are the dark-theme values, so a missing variable
+ * degrades to "looks right in dark mode" rather than "invisible".
+ *
+ * Spacing runs on a 4px scale with a consistent 16px horizontal inset, so rows, headers and
+ * section titles all share one left edge.
+ */
+
+.qm-launcher {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--interactive-normal, #b5bac1);
+  cursor: pointer;
+  flex: 0 0 auto;
+
+  /* The title bar is a drag region, so an element inside it swallows clicks without this. */
+  -webkit-app-region: no-drag;
+}
+
+.qm-launcher:hover {
+  background: var(--background-modifier-hover, rgb(255 255 255 / 4%));
+  color: var(--interactive-hover, #dbdee1);
+}
+
+/*
+ * Sits inside Discord's title bar, in a slot wearing the Inbox button's own wrapper classes.
+ * Discord's CSS handles the sizing and spacing, so this only needs to fill the slot.
+ */
+.qm-launcher-docked {
+  width: 100%;
+  height: 100%;
+  min-width: 24px;
+  min-height: 24px;
+}
+
+/* Only used when the toolbar cannot be found. Clear of the message box and the member list. */
+.qm-launcher-floating {
+  position: fixed;
+  z-index: 1002;
+  right: 16px;
+  bottom: 88px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--background-floating, var(--background-secondary, #1e1f22));
+  box-shadow: var(--elevation-high, 0 8px 16px rgb(0 0 0 / 24%));
+}
+
+.qm-launcher-dot {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 2px solid var(--background-base-low, #1e1f22);
+}
+
+.qm-panel {
+  position: fixed;
+  top: 44px;
+  right: 12px;
+  z-index: 1002;
+  width: 368px;
+  max-height: 76vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--background-floating, var(--background-secondary, #1e1f22));
+  box-shadow: var(--elevation-high, 0 8px 24px rgb(0 0 0 / 32%));
+  color: var(--text-normal, #dbdee1);
+  font-size: 14px;
+}
+
+.qm-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+}
+
+.qm-panel-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--header-primary, #f2f3f5);
+}
+
+.qm-panel-version {
+  margin-right: auto;
+  font-size: 11px;
+  color: var(--text-muted, #949ba4);
+}
+
+.qm-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted, #949ba4);
+  flex: 0 0 auto;
+}
+
+.qm-dot-working {
+  background: var(--status-warning, #f0b232);
+
+  /* Deliberate signal: the one thing worth catching your eye is "it is doing something". */
+  box-shadow: 0 0 0 3px rgb(240 178 50 / 22%);
+}
+
+.qm-dot-ready { background: var(--status-positive, #23a55a); }
+.qm-dot-stopped { background: var(--status-danger, #f23f43); }
+
+.qm-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--interactive-normal, #b5bac1);
+  cursor: pointer;
+}
+
+.qm-icon-btn:hover {
+  background: var(--background-modifier-hover, rgb(255 255 255 / 4%));
+  color: var(--interactive-hover, #dbdee1);
+}
+
+.qm-update {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 16px 4px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: rgb(240 178 50 / 10%);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.qm-update-text { flex: 1; }
+
+.qm-update-link {
+  flex: 0 0 auto;
+  color: var(--text-link, #00a8fc);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.qm-update-link:hover { text-decoration: underline; }
+
+.qm-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 8px 12px 16px;
+}
+
+.qm-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border-radius: 6px;
+}
+
+.qm-stat b {
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--header-primary, #f2f3f5);
+  line-height: 1;
+}
+
+.qm-stat span {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted, #949ba4);
+  text-align: center;
+}
+
+.qm-stat-zero b { color: var(--text-muted, #949ba4); }
+.qm-stat-ready b { color: var(--status-positive, #23a55a); }
+
+.qm-body {
+  overflow-y: auto;
+  padding-bottom: 8px;
+
+  /* The one separator in the panel: it earns its place by splitting summary from detail. */
+  border-top: 1px solid var(--background-modifier-accent, rgb(255 255 255 / 6%));
+}
+
+.qm-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 16px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted, #949ba4);
+}
+
+.qm-section-count {
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: var(--background-modifier-accent, rgb(255 255 255 / 6%));
+  color: var(--text-muted, #949ba4);
+  font-size: 10px;
+  letter-spacing: 0;
+}
+
+.qm-section-note {
+  padding: 0 16px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted, #949ba4);
+}
+
+.qm-row {
+  padding: 9px 16px 11px;
+}
+
+.qm-row:hover { background: var(--background-modifier-hover, rgb(255 255 255 / 4%)); }
+
+.qm-row-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--text-normal, #dbdee1);
+}
+
+.qm-bar {
+  height: 5px;
+  margin: 9px 0 7px;
+  border-radius: 3px;
+  background: var(--background-modifier-accent, rgb(255 255 255 / 6%));
+  overflow: hidden;
+}
+
+.qm-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--brand-500, #5865f2);
+  transition: width 0.3s ease;
+}
+
+.qm-fill-done { background: var(--status-positive, #23a55a); }
+
+.qm-row-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-muted, #949ba4);
+}
+
+.qm-row-why {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--status-danger, #f23f43);
+}
+
+/* Deliberately not the error colour: nothing is wrong, it just needs you. */
+.qm-row-note {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-muted, #949ba4);
+}
+
+.qm-section-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 16px 2px;
+}
+
+.qm-empty {
+  padding: 36px 24px;
+  text-align: center;
+  color: var(--text-muted, #949ba4);
+  font-size: 13px;
+  line-height: 1.6;
+}
