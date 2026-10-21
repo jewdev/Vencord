@@ -7,14 +7,13 @@
 import "./QuestPanel.css";
 
 import { Button } from "@components/Button";
+import { getQuestRuntime, isPanelOpen, QuestRuntime, setPanelOpen, subscribeQuestState, toggleQuestPanel } from "@plugins/completeDiscordQuest/questState";
+import settings from "@plugins/completeDiscordQuest/settings";
+import { QuestsStore } from "@plugins/completeDiscordQuest/stores";
+import { checkForUpdate, getUpdateState, REPO_URL, subscribeUpdateState } from "@plugins/completeDiscordQuest/utils/updateCheck";
+import { PLUGIN_VERSION } from "@plugins/completeDiscordQuest/utils/version";
 import { PluginNative } from "@utils/types";
 import { createRoot, NavigationRouter, ReactDOM, Tooltip, useEffect, useRef, useState } from "@webpack/common";
-
-import { getQuestRuntime, isPanelOpen, QuestRuntime, setPanelOpen, subscribeQuestState, toggleQuestPanel } from "../questState";
-import settings from "../settings";
-import { QuestsStore } from "../stores";
-import { checkForUpdate, getUpdateState, REPO_URL, subscribeUpdateState } from "../utils/updateCheck";
-import { PLUGIN_VERSION } from "../utils/version";
 
 // Registered automatically from native.ts by the build, keyed on the plugin's name.
 const Native = VencordNative.pluginHelpers.QuestMaster as PluginNative<typeof import("../native")>;

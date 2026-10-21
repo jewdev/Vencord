@@ -8,15 +8,14 @@ import "./QuestButton.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
+import { toggleQuestPanel } from "@plugins/completeDiscordQuest/questState";
+import settings from "@plugins/completeDiscordQuest/settings";
+import { QuestsStore } from "@plugins/completeDiscordQuest/stores";
 import {
     findByCodeLazy,
     findComponentByCodeLazy,
 } from "@webpack";
 import { NavigationRouter, Tooltip, useEffect, useState } from "@webpack/common";
-
-import { toggleQuestPanel } from "../questState";
-import settings from "../settings";
-import { QuestsStore } from "../stores";
 
 const QuestIcon = findByCodeLazy('"M7.5 21.7a8.95');
 const TopBarButton = findComponentByCodeLazy("badgePosition");

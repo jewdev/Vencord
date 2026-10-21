@@ -4,10 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { setQuestRuntime } from "../questState";
-import { addSpoofedGame, getSpoofedGames, removeSpoofedGame } from "../utils/gameSpoof";
-import { HEARTBEAT_GRACE_MS, readTaskProgress } from "../utils/quest";
-import { callWithRetry } from "../utils/retry";
+import { setQuestRuntime } from "@plugins/completeDiscordQuest/questState";
+import { addSpoofedGame, getSpoofedGames, removeSpoofedGame } from "@plugins/completeDiscordQuest/utils/gameSpoof";
+import { HEARTBEAT_GRACE_MS, readTaskProgress } from "@plugins/completeDiscordQuest/utils/quest";
+import { callWithRetry } from "@plugins/completeDiscordQuest/utils/retry";
+
 import { QuestHandler } from "./types";
 
 export const playOnDesktopHandler: QuestHandler = {

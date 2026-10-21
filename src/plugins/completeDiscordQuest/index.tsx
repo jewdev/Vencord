@@ -5,6 +5,7 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { FluxDispatcher, RestAPI } from "@webpack/common";
@@ -354,10 +355,7 @@ function handleQuestCompletion(quest: QuestValue) {
 export default definePlugin({
     name: "QuestMaster",
     description: "Effortlessly complete Discord quests in the background. Auto-accepts, auto-completes, and auto-claims with optional captcha bypass. Press Ctrl+Shift+Q for the quest panel.",
-    authors: [{
-        name: "winters27",
-        id: 681989594341834765n
-    }],
+    authors: [Devs.winters27],
     settings,
     patches: [
         {

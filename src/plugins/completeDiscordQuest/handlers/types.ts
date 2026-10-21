@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { SpoofingProfile } from "../types/spoofing";
+import { SpoofingProfile } from "@plugins/completeDiscordQuest/types/spoofing";
 
 export interface QuestHandlerContext {
     quest: QuestValue;
