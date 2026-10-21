@@ -24,7 +24,7 @@ import {
 } from "@webpack/common";
 import type { PropsWithChildren, SVGProps } from "react";
 
-const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
+const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'position:"bottom"');
 
 interface BaseIconProps extends IconProps {
     viewBox: string;
@@ -58,11 +58,12 @@ function Icon({
     );
 }
 
-function FollowIcon(props: IconProps) {
+function FollowIcon({ height = 24, width = 24, className }: IconProps) {
     return (
         <Icon
-            {...props}
-            className={classes(props.className, "vc-follow-icon")}
+            height={height}
+            width={width}
+            className={classes(className, "vc-follow-icon")}
             viewBox="0 -960 960 960"
         >
             <path
@@ -73,11 +74,12 @@ function FollowIcon(props: IconProps) {
     );
 }
 
-function UnfollowIcon(props: IconProps) {
+function UnfollowIcon({ height = 24, width = 24, className }: IconProps) {
     return (
         <Icon
-            {...props}
-            className={classes(props.className, "vc-unfollow-icon")}
+            height={height}
+            width={width}
+            className={classes(className, "vc-unfollow-icon")}
             viewBox="0 -960 960 960"
         >
             <path
@@ -266,6 +268,7 @@ const UserContext: NavContextMenuPatchCallback = (children, { user }: UserContex
                 label={label}
                 action={() => toggleFollow(user.id)}
                 icon={icon}
+                leadingAccessory={{ type: "icon", icon }}
             />
         </Menu.MenuGroup>
     ));
@@ -280,10 +283,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: "toolbar:function",
+            find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
-                match: /(function \i\(\i\){)(.{1,200}toolbar.{1,100}mobileToolbar)/,
-                replace: "$1$self.addIconToToolBar(arguments[0]);$2"
+                match: /(?<=trailing:.{0,80}?\{children:\[)/,
+                replace: "$self.renderIndicator(),"
             }
         },
     ],
@@ -341,36 +344,33 @@ export default definePlugin({
         const { plugins: { FollowUser: { followUserId } } } = useSettings(["plugins.FollowUser.followUserId"]);
         if (followUserId) {
             return (
-                <HeaderBarIcon
-                    tooltip={`Following ${UserStore.getUser(followUserId).username} (click to trigger manually, right-click to unfollow)`}
-                    icon={UnfollowIcon}
-                    onClick={() => {
-                        triggerFollow();
-                    }}
-                    onContextMenu={() => {
+                // HeaderBarIcon doesn't forward onContextMenu, so catch the bubbled event on a wrapper
+                <div
+                    style={{ display: "contents" }}
+                    onContextMenu={e => {
+                        e.preventDefault();
                         settings.store.followUserId = "";
                     }}
-                />
+                >
+                    <HeaderBarIcon
+                        tooltip={`Following ${UserStore.getUser(followUserId).username} (click to trigger manually, right-click to unfollow)`}
+                        icon={() => <UnfollowIcon width={18} height={18} />}
+                        onClick={() => {
+                            triggerFollow();
+                        }}
+                    />
+                </div>
             );
         }
 
         return null;
     },
 
-    addIconToToolBar(e: { toolbar: React.ReactNode[] | React.ReactNode; }) {
-        if (Array.isArray(e.toolbar)) {
-            return e.toolbar.unshift(
-                <ErrorBoundary noop={true} key="follow-indicator">
-                    <this.FollowIndicator />
-                </ErrorBoundary>
-            );
-        }
-
-        e.toolbar = [
-            <ErrorBoundary noop={true} key="follow-indicator">
+    renderIndicator() {
+        return (
+            <ErrorBoundary noop key="vc-follow-indicator">
                 <this.FollowIndicator />
-            </ErrorBoundary>,
-            e.toolbar,
-        ];
+            </ErrorBoundary>
+        );
     },
 });
