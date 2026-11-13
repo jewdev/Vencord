@@ -72,6 +72,66 @@ export default definePluginSettings({
         description: "Check GitHub for a newer version and show a notice in the panel. Only reads a version number; it never downloads or installs anything.",
         default: true,
     },
+    notifyOnClaimable: {
+        type: OptionType.BOOLEAN,
+        description: "Show a toast when a quest reward becomes claimable. One per quest, not one per check.",
+        default: true,
+    },
+    achievementBypass: {
+        type: OptionType.BOOLEAN,
+        description:
+            "Complete activity achievement quests without playing them. This is the only setting here that acts on your account rather than on your client: it OAuth-authorizes each quest's application on your account, reports progress to that activity's own backend, then revokes the authorization. Forging progress with a logged-in account is what Discord has been enforcing against, and enforcement reaches the whole account. Off unless you turn it on.",
+        default: false,
+    },
+    taskWatchVideo: {
+        type: OptionType.BOOLEAN,
+        description: "Run video quests. Fully automatic.",
+        default: true,
+    },
+    taskWatchVideoOnMobile: {
+        type: OptionType.BOOLEAN,
+        description: "Run mobile video quests. They complete from the desktop client just fine.",
+        default: true,
+    },
+    taskPlayOnDesktop: {
+        type: OptionType.BOOLEAN,
+        description: "Run play-a-game quests. Nothing is installed or launched; Discord is told the game is running.",
+        default: true,
+    },
+    taskStreamOnDesktop: {
+        type: OptionType.BOOLEAN,
+        description: "Run stream-a-game quests. You still have to Go Live in a call with at least one other person.",
+        default: true,
+    },
+    taskPlayActivity: {
+        type: OptionType.BOOLEAN,
+        description: "Run activity quests.",
+        default: true,
+    },
+    skippedQuestIds: {
+        type: OptionType.STRING,
+        description: "Quests to leave alone, one id per line. The panel writes this when you skip or stop a quest.",
+        default: "",
+        placeholder: "Skipped quests appear here.",
+    },
+    questsPaused: {
+        type: OptionType.BOOLEAN,
+        description: "Pause every quest. Survives a restart on purpose: a pause that lifts itself is a pause you cannot trust.",
+        default: false,
+        hidden: true,
+    },
+    questPanelPosition: {
+        type: OptionType.STRING,
+        description: "Where the panel sits, as left,top. Written when you drag it.",
+        default: "",
+        hidden: true,
+    },
+    seenChangelogVersion: {
+        type: OptionType.STRING,
+        description: "Which version's changelog has been read.",
+        default: "",
+        hidden: true,
+    },
     spoofingSpeedMode: {
         type: OptionType.SELECT,
         description: "Controls how quickly spoofed progress/heartbeats are sent.",

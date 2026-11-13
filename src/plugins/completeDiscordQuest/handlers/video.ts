@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { setQuestRuntime } from "@plugins/completeDiscordQuest/questState";
-import { callWithRetry } from "@plugins/completeDiscordQuest/utils/retry";
-
+import { setQuestRuntime } from "../questState";
+import { Cancelled } from "../utils/questControl";
+import { callWithRetry } from "../utils/retry";
 import { QuestHandler } from "./types";
 
 const videoTasks = ["WATCH_VIDEO", "WATCH_VIDEO_ON_MOBILE"] as const;
@@ -16,7 +16,7 @@ export const videoHandler: QuestHandler = {
         return videoTasks.includes(taskName as (typeof videoTasks)[number]);
     },
 
-    async handle({ quest, questName, secondsNeeded, secondsDone, completingQuest, RestAPI, getSpoofingProfile, onQuestComplete }) {
+    async handle({ quest, questName, secondsNeeded, secondsDone, completingQuest, controller, RestAPI, getSpoofingProfile, onQuestComplete }) {
         const { maxFuture, speed, interval } = getSpoofingProfile().video;
         const enrolledAt = new Date(quest.userStatus.enrolledAt).getTime();
         let completed = false;
@@ -24,6 +24,8 @@ export const videoHandler: QuestHandler = {
 
         const watchVideo = async () => {
             while (true) {
+                await controller.gate();
+
                 const maxAllowed = Math.floor((Date.now() - enrolledAt) / 1000) + maxFuture;
                 const diff = maxAllowed - secondsDone;
                 const timestamp = secondsDone + speed;
@@ -59,7 +61,7 @@ export const videoHandler: QuestHandler = {
                     reachedTarget = true;
                     break;
                 }
-                await new Promise(resolve => setTimeout(resolve, interval * 1000));
+                await controller.sleep(interval * 1000);
             }
             if (reachedTarget && !completed) {
                 try {
@@ -74,7 +76,16 @@ export const videoHandler: QuestHandler = {
             }
         };
 
-        watchVideo();
+        watchVideo().catch(err => {
+            // A stop is the expected way out of the loop, not something to report as a failure.
+            if (err instanceof Cancelled) {
+                completingQuest.set(quest.id, false);
+                return;
+            }
+            console.error("[QuestMaster] Video quest failed:", questName, err);
+            setQuestRuntime(quest.id, { status: "skipped", why: "video quest failed" });
+            completingQuest.set(quest.id, false);
+        });
         console.log(`Spoofing video for ${questName}.`);
     }
 };

@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { SpoofingProfile } from "@plugins/completeDiscordQuest/types/spoofing";
+import { SpoofingProfile } from "../types/spoofing";
+import { QuestController } from "../utils/questControl";
 
 export interface QuestHandlerContext {
     quest: QuestValue;
@@ -32,6 +33,8 @@ export interface QuestHandlerContext {
     ChannelStore: any;
     GuildChannelStore: any;
     getSpoofingProfile: () => SpoofingProfile;
+    /** Pause, resume and stop for this one quest. */
+    controller: QuestController;
     onQuestComplete: () => void;
 }
 

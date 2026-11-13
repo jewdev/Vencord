@@ -88,7 +88,13 @@
   align-items: center;
   gap: 10px;
   padding: 14px 16px;
+
+  /* The header is the drag handle, so it should not select as text while you drag it. */
+  cursor: grab;
+  user-select: none;
 }
+
+.qm-panel-header:active { cursor: grabbing; }
 
 .qm-panel-title {
   font-size: 15px;
@@ -121,6 +127,7 @@
 .qm-dot-stopped { background: var(--status-danger, #f23f43); }
 
 .qm-icon-btn {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -233,6 +240,9 @@
 }
 
 .qm-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
   padding: 9px 16px 11px;
 }
 
@@ -302,4 +312,316 @@
   color: var(--text-muted, #949ba4);
   font-size: 13px;
   line-height: 1.6;
+}
+
+/* A slot that found no Discord wrapper class to borrow has to size itself, or it collapses. */
+.qm-slot-bare {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: 0 4px;
+}
+
+.qm-row-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 20px;
+}
+
+.qm-row-head .qm-row-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.qm-row-orbs {
+  display: inline-flex;
+  flex: none;
+  gap: 3px;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-warning, #f0b232);
+}
+
+/* Actions stay out of the way until the row is pointed at, so a full list still reads as a list. */
+.qm-row-actions {
+  display: none;
+  flex: none;
+  gap: 2px;
+}
+
+.qm-row:hover .qm-row-actions,
+.qm-row:focus-within .qm-row-actions {
+  display: flex;
+}
+
+.qm-row:hover .qm-row-orbs-yields,
+.qm-row:focus-within .qm-row-orbs-yields {
+  display: none;
+}
+
+.qm-row-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--interactive-normal, #b5bac1);
+  cursor: pointer;
+}
+
+.qm-row-btn:hover {
+  background: var(--background-modifier-selected, rgb(255 255 255 / 8%));
+  color: var(--interactive-active, #f2f3f5);
+}
+
+/* A paused bar should read as held, rather than as progress that stopped for no reason. */
+.qm-fill-paused {
+  background: var(--text-warning, #f0b232);
+  opacity: 0.6;
+}
+
+.qm-dot-paused { background: var(--text-warning, #f0b232); }
+
+.qm-icon-btn-on { color: var(--text-warning, #f0b232); }
+
+.qm-icon-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--status-danger, #f23f43);
+}
+
+.qm-link-btn {
+  margin-left: auto;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-link, #00a8fc);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+  cursor: pointer;
+}
+
+.qm-link-btn:hover { text-decoration: underline; }
+
+.qm-log-entry {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--background-modifier-accent, rgb(255 255 255 / 6%));
+}
+
+.qm-log-head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--header-primary, #f2f3f5);
+}
+
+.qm-log-date {
+  font-size: 11px;
+  color: var(--text-muted, #949ba4);
+}
+
+.qm-log-current {
+  padding: 1px 5px;
+  border-radius: 8px;
+  background: var(--brand-experiment, #5865f2);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.qm-log-notes {
+  margin: 4px 0 0;
+  padding-left: 16px;
+  color: var(--text-normal, #dbdee1);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.qm-log-notes li { margin-bottom: 2px; }
+
+/* The panel's own hover label. Every colour ends in a literal: a var() chain with nothing behind
+   it computes to the initial value, and for a background that is transparent. */
+.qm-hint {
+  position: fixed;
+  z-index: 1003;
+  max-width: 200px;
+  padding: 5px 9px;
+  border-radius: 5px;
+  background: var(--background-floating, #111214);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 25%);
+  color: var(--text-normal, #dbdee1);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: center;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+}
+
+.qm-hint-below {
+  transform: translate(-50%, 0);
+}
+
+
+.qm-panel-status {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-muted, #949ba4);
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.qm-panel-status-paused { color: var(--text-warning, #f0b232); }
+
+
+.qm-row-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.qm-row-tile {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  margin-top: 1px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.qm-row-tile-glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background-modifier-hover, rgb(255 255 255 / 6%));
+  color: var(--text-muted, #949ba4);
+}
+
+
+
+.qm-row-why-paused { color: var(--text-warning, #f0b232); }
+
+.qm-footer {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding: 7px 12px;
+  border-top: 1px solid var(--background-modifier-accent, rgb(255 255 255 / 6%));
+  color: var(--text-warning, #f0b232);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* Launcher badge: a count, not a dot, so it says how much rather than only that there is some. */
+.qm-launcher-badge {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border: 2px solid var(--background-secondary, #2b2d31);
+  border-radius: 7px;
+  box-sizing: border-box;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.qm-badge-claim { background: var(--status-positive, #23a55a); }
+
+.qm-badge-work {
+  background: var(--text-warning, #f0b232);
+  color: #1e1f22;
+}
+.qm-badge-hold { background: var(--background-modifier-selected, #4e5058); }
+
+.qm-setting {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 12px;
+}
+
+.qm-setting-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.qm-setting-label {
+  color: var(--text-normal, #dbdee1);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.qm-setting-note {
+  margin-top: 1px;
+  color: var(--text-muted, #949ba4);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.qm-actions {
+  display: flex;
+  gap: 6px;
+  padding: 4px 12px 8px;
+}
+
+.qm-about {
+  padding-bottom: 4px;
+}
+
+.qm-about-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  color: var(--text-normal, #dbdee1);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.qm-about-row:hover {
+  background: var(--background-modifier-hover, rgb(255 255 255 / 4%));
+}
+
+.qm-about-hint {
+  flex: none;
+  color: var(--text-muted, #949ba4);
+  font-size: 11px;
+}
+
+.qm-pill {
+  margin-left: 6px;
+  padding: 1px 5px;
+  border-radius: 8px;
+  background: var(--brand-experiment, #5865f2);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
 }

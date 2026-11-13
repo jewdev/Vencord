@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { setQuestRuntime } from "@plugins/completeDiscordQuest/questState";
-import { addSpoofedGame, getSpoofedGames, removeSpoofedGame } from "@plugins/completeDiscordQuest/utils/gameSpoof";
-import { HEARTBEAT_GRACE_MS, readTaskProgress } from "@plugins/completeDiscordQuest/utils/quest";
-import { callWithRetry } from "@plugins/completeDiscordQuest/utils/retry";
-
+import { setQuestRuntime } from "../questState";
+import { addSpoofedGame, getAllGames, removeSpoofedGame } from "../utils/gameSpoof";
+import { describeHeartbeatError, HeartbeatWatchdog } from "../utils/heartbeat";
+import { readTaskProgress } from "../utils/quest";
+import { callWithRetry } from "../utils/retry";
 import { QuestHandler } from "./types";
 
 export const playOnDesktopHandler: QuestHandler = {
@@ -16,7 +16,7 @@ export const playOnDesktopHandler: QuestHandler = {
         return taskName === "PLAY_ON_DESKTOP";
     },
 
-    handle({ quest, questName, taskName, secondsNeeded, secondsDone, applicationId, applicationName, pid, isApp, RestAPI, FluxDispatcher, RunningGameStore, completingQuest, configVersion, onQuestComplete }) {
+    handle({ quest, questName, taskName, secondsNeeded, secondsDone, applicationId, applicationName, pid, isApp, RestAPI, FluxDispatcher, RunningGameStore, completingQuest, controller, configVersion, onQuestComplete }) {
         if (!isApp) {
             console.log("This no longer works in browser for non-video quests. Use the discord desktop app to complete the", questName, "quest!");
             return;
@@ -40,18 +40,37 @@ export const playOnDesktopHandler: QuestHandler = {
                 start: Date.now(),
             };
 
-            const realGames = RunningGameStore.getRunningGames();
-            addSpoofedGame(RunningGameStore, quest.id, fakeGame);
-
-            FluxDispatcher.dispatch({ type: "RUNNING_GAMES_CHANGE", removed: realGames, added: [fakeGame], games: getSpoofedGames() });
+            let spoofing = false;
+            const startSpoof = () => {
+                if (spoofing) return;
+                spoofing = true;
+                addSpoofedGame(RunningGameStore, quest.id, fakeGame);
+                // Nothing is removed: the spoof adds to what is really running rather than
+                // standing in for it, so the payload has to describe the whole set.
+                FluxDispatcher.dispatch({ type: "RUNNING_GAMES_CHANGE", removed: [], added: [fakeGame], games: getAllGames() });
+            };
+            const stopSpoof = () => {
+                if (!spoofing) return;
+                spoofing = false;
+                removeSpoofedGame(quest.id);
+                FluxDispatcher.dispatch({ type: "RUNNING_GAMES_CHANGE", removed: [fakeGame], added: [], games: getAllGames() });
+            };
 
             let cleaned = false;
-            let beats = 0;
-            let watchdog: ReturnType<typeof setTimeout> | undefined;
+
+            const watchdog = new HeartbeatWatchdog({
+                questName,
+                onGiveUp: verdict => {
+                    console.error(verdict.message);
+                    setQuestRuntime(quest.id, { status: "skipped", why: verdict.reason });
+                    cleanup(false);
+                },
+            });
 
             const unsubscribe = () => {
                 try {
                     FluxDispatcher.unsubscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", onHeartbeat);
+                    FluxDispatcher.unsubscribe("QUESTS_SEND_HEARTBEAT_FAILURE", onHeartbeatFailure);
                 } catch {
 
                 }
@@ -61,10 +80,8 @@ export const playOnDesktopHandler: QuestHandler = {
                 if (cleaned) return;
                 cleaned = true;
 
-                clearTimeout(watchdog);
-                removeSpoofedGame(quest.id);
-                FluxDispatcher.dispatch({ type: "RUNNING_GAMES_CHANGE", removed: [fakeGame], added: [], games: getSpoofedGames() });
-
+                watchdog.stop();
+                stopSpoof();
                 unsubscribe();
 
                 if (completed) {
@@ -73,23 +90,6 @@ export const playOnDesktopHandler: QuestHandler = {
                 } else {
                     completingQuest.set(quest.id, false);
                 }
-            };
-
-            // Discord sends the heartbeat itself while it believes the game is running, so if
-            // it never accepts the spoofed process nothing arrives and the quest would sit at
-            // 0% in silence. Re-armed on every beat so a task that stops partway is caught too.
-            const armWatchdog = () => {
-                clearTimeout(watchdog);
-                watchdog = setTimeout(() => {
-                    console.error(beats === 0
-                        ? `[QuestMaster] Discord never sent a heartbeat for "${questName}". It is not accepting the spoofed game on this client, so there is nothing to wait for.`
-                        : `[QuestMaster] Discord stopped sending heartbeats for "${questName}" after ${beats}. Giving up.`);
-                    setQuestRuntime(quest.id, {
-                        status: "skipped",
-                        why: beats === 0 ? "Discord never started it" : "heartbeats stopped",
-                    });
-                    cleanup(false);
-                }, HEARTBEAT_GRACE_MS);
             };
 
             const onHeartbeat = (data: any) => {
@@ -101,8 +101,7 @@ export const playOnDesktopHandler: QuestHandler = {
                     return;
                 }
 
-                beats++;
-                armWatchdog();
+                watchdog.beat();
 
                 const progress = readTaskProgress(data.userStatus, taskName, configVersion);
                 setQuestRuntime(quest.id, { value: progress, target: secondsNeeded });
@@ -114,8 +113,36 @@ export const playOnDesktopHandler: QuestHandler = {
                 }
             };
 
+            // A beat Discord tried and failed is not the same as Discord going quiet, and it does
+            // not resend one: the next attempt is the tick already scheduled.
+            const onHeartbeatFailure = (data: any) => {
+                if (data?.questId !== quest.id) return;
+                watchdog.fail(describeHeartbeatError(data));
+            };
+
+            // Pausing has to drop the spoof, not just stop reading. While the fake game is still
+            // in the store Discord keeps crediting time, so a pause that only looked away would
+            // pause nothing. Dropping it also means the watchdog has to stand down, since the
+            // heartbeats stopping is the intended result rather than a fault.
+            controller.onPause = () => {
+                watchdog.stop();
+                stopSpoof();
+            };
+            controller.onResume = () => {
+                startSpoof();
+                watchdog.start();
+            };
+            controller.onCancel = () => cleanup(false);
+
             FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", onHeartbeat);
-            armWatchdog();
+            FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_FAILURE", onHeartbeatFailure);
+
+            // Starting a quest that is already paused must not spoof at all, rather than spoof
+            // and immediately take it back.
+            if (!controller.paused) {
+                startSpoof();
+                watchdog.start();
+            }
 
             console.log(`Spoofed your game to ${applicationName ?? appData.name}. Wait for ${Math.ceil((secondsNeeded - secondsDone) / 60)} more minutes.`);
         }).catch(err => {
